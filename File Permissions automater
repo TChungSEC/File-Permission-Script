@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# Function to change permissions for a single file
+change_permissions_single_file() {
+    local file="$1"
+    local permissions="$2"
+    
+    if [ ! -f "$file" ]; then
+        echo "Error: '$file' is not a regular file."
+        return 1
+    fi
+    
+    chmod "$permissions" "$file"
+    if [ $? -eq 0 ]; then
+        echo "Permissions changed successfully for file: $file"
+    else
+        echo "Error: Failed to change permissions for file: $file"
+    fi
+}
+
+# Function to change permissions for files in a directory recursively
+change_permissions_directory() {
+    local directory="$1"
+    local permissions="$2"
+    
+    if [ ! -d "$directory" ]; then
+        echo "Error: Directory not found: $directory"
+        return 1
+    fi
+    
+    echo "Changing permissions to $permissions for files in directory: $directory ..."
+    find "$directory" -type f -exec chmod "$permissions" {} +
+    
+    if [ $? -eq 0 ]; then
+        echo "Permissions changed successfully for all files in directory: $directory"
+    else
+        echo "Error: Failed to change permissions for some files in directory: $directory"
+    fi
+}
+
+# Main script
+
+# Check if arguments are provided
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <file_or_directory_path> <permissions>"
+    exit 1
+fi
+
+target="$1"
+permissions="$2"
+
+# Check if permissions argument is provided
+if [ -z "$permissions" ]; then
+    echo "Error: Please specify permissions (e.g., 755)."
+    exit 1
+fi
+
+# Check if the target path exists
+if [ ! -e "$target" ]; then
+    echo "Error: File or directory not found: $target"
+    exit 1
+fi
+
+# Determine whether target is a file or directory
+if [ -f "$target" ]; then
+    # Target is a single file
+    change_permissions_single_file "$target" "$permissions"
+elif [ -d "$target" ]; then
+   
